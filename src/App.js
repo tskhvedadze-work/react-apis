@@ -1,24 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
+import { User } from "./components/User/User";
+import { useEffect, useState } from "react";
+
+import axios from "axios";
 
 function App() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  async function get_users(searchKeyword) {
+    try {
+      setError("");
+      setLoading(true);
+      const resp = await axios.get(
+        `https://dummyjson.com/users/search?q=${searchKeyword}`
+      );
+      setUsers(resp.data?.users);
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    get_users(searchKeyword);
+  }, [searchKeyword]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <input
+        placeholder="Search"
+        value={searchKeyword}
+        onChange={(e) => setSearchKeyword(e.target.value)}
+      />
+      {error && <div>რახდება არვიცი</div>}
+      {loading ? (
+        <div>იტვირთება</div>
+      ) : (
+        <ul>
+          {users.map((user) => {
+            return <User user={user} />;
+          })}
+        </ul>
+      )}
+    </>
   );
 }
 
